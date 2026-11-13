@@ -7,7 +7,7 @@
 [![Pedagoji](https://img.shields.io/badge/Model-Gagne'nin%209%20%C3%96%C4%9Fretim%20Etkinli%C4%9Fi-00B894?style=for-the-badge)](https://github.com/)
 [![Süre](https://img.shields.io/badge/Ders%20Plan%C4%B1-80%20Dakika%20(40%2B40)-FDCB6E?style=for-the-badge)](https://github.com/)
 
-🔗 **[Canlı Uygulamayı Aç (GitHub Pages)](https://KULLANICI_ADINIZ.github.io/7-sinif-ai-web-tasarim-modulu/)**
+🔗 **[Canlı Uygulamayı Aç (GitHub Pages)](https://kerimasik1577.github.io/7-sinif-ai-web-tasarim-modulu/)**
 
 ---
 
