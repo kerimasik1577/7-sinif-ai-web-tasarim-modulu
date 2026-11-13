@@ -1,0 +1,1 @@
+# 7-sinif-ai-web-tasarim-modulu
