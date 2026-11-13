@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Mühendisi 7: Yapay Zeka ile Web Sitesi Tasarlama (80 Dk Planı)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            yellow: '#FDCB6E',
+                            pink: '#FF7675',
+                            blue: '#0984E3',
+                            green: '#00B894',
+                            orange: '#E17055',
+                            dark: '#2D3436'
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F8F9FA;
+            user-select: none;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.96);
+        }
+        @keyframes float-gentle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: float-gentle 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Gamification Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-50 px-4 py-3 border-b-4 border-brand-blue">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="goToStep(1)">
+                <div class="bg-gradient-to-tr from-brand-blue to-brand-purple text-white p-2.5 rounded-2xl shadow-lg transform hover:scale-105 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-brand-blue tracking-wide">AI WEB MİMARI 7</h1>
+                    <p class="text-xs text-slate-500 font-semibold">7. Sınıf BİL-TEK • Prompt ile Web Sitesi Tasarlama</p>
+                </div>
+            </div>
+
+            <!-- Gamification Status Bar -->
+            <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200 shadow-inner">
+                <div class="flex items-center space-x-1.5" title="Kazanılan Puan (XP)">
+                    <i class="fa-solid fa-star text-amber-400 text-xl animate-bounce"></i>
+                    <span id="user-points" class="font-heading text-lg font-bold text-slate-700">0</span>
+                    <span class="text-xs text-slate-400 font-bold">XP</span>
+                </div>
+                <div class="h-6 w-px bg-slate-300"></div>
+                
+                <div class="flex items-center space-x-1.5" title="Ders Süresi">
+                    <i class="fa-regular fa-clock text-brand-blue text-lg"></i>
+                    <span class="font-heading text-sm font-bold text-slate-700">80 Dk (2 Ders)</span>
+                </div>
+                <div class="h-6 w-px bg-slate-300"></div>
+                
+                <div class="flex items-center space-x-1.5" title="Kazanılan Rozet">
+                    <i class="fa-solid fa-medal text-brand-pink text-xl"></i>
+                    <span id="user-badges-count" class="font-heading text-lg font-bold text-slate-700">0</span>
+                </div>
+                <div class="h-6 w-px bg-slate-300"></div>
+
+                <div class="flex flex-col min-w-[110px]">
+                    <div class="flex justify-between text-xs font-bold mb-0.5">
+                        <span class="text-brand-blue">İlerleme</span>
+                        <span class="text-slate-400" id="level-percent">%12</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="level-bar" class="bg-gradient-to-r from-brand-blue to-brand-green h-2.5 rounded-full transition-all duration-500" style="width: 12%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher/Analytics Modal Button -->
+            <div>
+                <button onclick="toggleAnalyticsModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-100 text-brand-blue hover:bg-blue-200 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-pie"></i> BÖTE Analitik Paneli
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-grow space-y-6">
+
+        <!-- GAGNE 9 STEP NAVIGATOR BAR (80 MINUTES) -->
+        <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
+            <div class="flex items-center space-x-2 min-w-max">
+                <button id="nav-btn-1" onclick="goToStep(1)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-blue text-white transition flex items-center gap-1">
+                    <span>1. 🔔 Dikkat Çekme (0-10 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-2" onclick="goToStep(2)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 transition flex items-center gap-1">
+                    <span>2. 🎯 Hedef & Ön Bilgi (10-20 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-3" onclick="goToStep(3)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 transition flex items-center gap-1">
+                    <span>3. 🧩 Prompt Formülü (20-35 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-4" onclick="goToStep(4)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 transition flex items-center gap-1">
+                    <span>4. 🧱 Prompt İnşa Et (35-45 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-5" onclick="goToStep(5)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-900 transition flex items-center gap-1 shadow">
+                    <span>5. 🚀 Canlı AI Web Stüdyosu (45-60 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-6" onclick="goToStep(6)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 transition flex items-center gap-1">
+                    <span>6. 🛠️ Prompt Tamircisi (60-65 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-7" onclick="goToStep(7)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white transition flex items-center gap-1 shadow">
+                    <span>7. ✍️ Serbest Prompt & Web Üret (65-75 Dk)</span>
+                </button>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                <button id="nav-btn-8" onclick="goToStep(8)" class="nav-pill px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 transition flex items-center gap-1">
+                    <span>8. 🏆 Quiz & Ödev (75-80 Dk)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 1: DİKKAT ÇEKME (0-10 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-1" class="step-section space-y-6">
+            <div class="bg-gradient-to-r from-brand-blue via-indigo-600 to-brand-purple rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-3xl space-y-4">
+                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-sparkles text-amber-300 mr-1"></i> Gagne 1. Etkinlik • 00 - 10. Dakika
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Yapay Zeka Seni Yanlış Anlarsa Ne Olur? 🤯</h2>
+                    <p class="text-blue-100 text-sm md:text-base leading-relaxed">
+                        Yapay zeka çok zekidir ama aklını okuyamaz! Ona sadece <em>"Bana bir oyun sitesi yap"</em> dersen ortaya çok sıradan bir şey çıkar. Ama ona doğru kelimelerle (<strong>Prompt / İstem</strong>) emir verirsen harikalar yaratır!
+                    </p>
+                </div>
+                <div class="absolute right-6 bottom-4 opacity-20 text-8xl animate-float hidden md:block">🤖</div>
+            </div>
+
+            <!-- Kötü Prompt vs İyi Prompt Canlı Karşılaştırma -->
+            <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-brand-blue"></i> Deney Zamanı: İki Farklı İstemle Site Oluştur
+                </h3>
+                <p class="text-xs text-slate-500">Aşağıdaki iki butona sırayla tıkla ve sağdaki ekranda oluşan web sitesi farkını gözlemle!</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 space-y-3">
+                        <button onclick="demoPrompt('bad')" class="w-full p-4 rounded-2xl border-2 border-rose-200 bg-rose-50/60 hover:bg-rose-100 text-left transition space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-extrabold text-rose-600 uppercase">❌ Zayıf / Eksik Prompt</span>
+                                <span class="text-[10px] bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full font-bold">Tıkla Dene</span>
+                            </div>
+                            <p class="font-mono text-xs text-slate-700 font-bold">"Bana bir uzay sitesi yap."</p>
+                        </button>
+
+                        <button onclick="demoPrompt('good')" class="w-full p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100 text-left transition space-y-1 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-extrabold text-emerald-700 uppercase">✅ Profesyonel / Detaylı Prompt</span>
+                                <span class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-bold">+15 XP</span>
+                            </div>
+                            <p class="font-mono text-xs text-slate-700 font-bold">"7. sınıf öğrencileri için koyu lacivert temalı bir Güneş Sistemi web sitesi tasarla. Üstte menü, ortada gezegen kartları ve etkileşimli bir bilgi butonu olsun."</p>
+                        </button>
+                    </div>
+
+                    <!-- Canlı Önizleme Monitörü -->
+                    <div class="md:col-span-7 bg-slate-900 rounded-2xl p-3 shadow-inner border-4 border-slate-700">
+                        <div class="flex items-center gap-1.5 mb-2 px-1">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-[10px] text-slate-400 font-mono ml-2">ai-onizleme.html</span>
+                        </div>
+                        <div id="step1-preview" class="bg-white rounded-xl h-56 p-4 flex flex-col items-center justify-center text-center transition-all duration-300 overflow-hidden">
+                            <i class="fa-solid fa-desktop text-4xl text-slate-300 mb-2"></i>
+                            <p class="text-xs text-slate-400 font-bold">Soldaki istemlerden birine tıklayarak yapay zekanın ürettiği siteyi gör!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button onclick="goToStep(2)" class="bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition flex items-center gap-2 shadow">
+                        2. Adıma Geç: Hedef & Web Parçaları <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 2: HEDEFLER & ÖN BİLGİLERİ HATIRLATMA (10-20 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-2" class="step-section hidden space-y-6">
+            <div class="bg-indigo-50 border-l-4 border-brand-purple p-5 rounded-2xl flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-xs text-brand-purple font-bold uppercase tracking-wider">Gagne 2 & 3. Etkinlik • 10 - 20. Dakika</span>
+                    <h3 class="font-bold text-slate-800 text-xl mt-1">Ders Kazanımları & Web Sitesinin Yapı Taşları</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+                    <div class="bg-blue-100 text-brand-blue w-10 h-10 rounded-xl flex items-center justify-center font-bold">1</div>
+                    <h4 class="font-bold text-slate-800">Prompt Mühendisliği</h4>
+                    <p class="text-xs text-slate-500">Yapay zekaya net, anlaşılır ve yapılandırılmış tasarım komutları yazabilme.</p>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+                    <div class="bg-purple-100 text-brand-purple w-10 h-10 rounded-xl flex items-center justify-center font-bold">2</div>
+                    <h4 class="font-bold text-slate-800">Web Arayüz Bileşenleri</h4>
+                    <p class="text-xs text-slate-500">Header (Üst Menü), Hero (Giriş Alanı), Kartlar ve Footer (Alt Bilgi) kavramlarını kullanma.</p>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+                    <div class="bg-emerald-100 text-brand-green w-10 h-10 rounded-xl flex items-center justify-center font-bold">3</div>
+                    <h4 class="font-bold text-slate-800">İterasyon (İyileştirme)</h4>
+                    <p class="text-xs text-slate-500">Üretilen web sitesindeki eksikleri ek komutlar vererek adım adım geliştirme.</p>
+                </div>
+            </div>
+
+            <!-- Ön Bilgi Mini Eşleştirme -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-amber-500"></i> Hızlı Hatırlatma: Web Sitesi Bölümleri
+                </h4>
+                <p class="text-xs text-slate-600">Yapay zekaya <em>"Sayfanın en üstünde logo ve menü linklerinin olduğu bir bölüm ekle"</em> demek istediğinde hangi web terimini kullanırsın?</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button onclick="checkPriorStep2(true, this)" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-brand-blue font-bold text-xs text-slate-700 transition">A) Header (Üst Bilgi / Menü)</button>
+                    <button onclick="checkPriorStep2(false, this)" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-rose-400 font-bold text-xs text-slate-700 transition">B) Footer (En Alt Kısım)</button>
+                    <button onclick="checkPriorStep2(false, this)" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-rose-400 font-bold text-xs text-slate-700 transition">C) Popup (Açılır Pencere)</button>
+                </div>
+                <div id="prior-fb-2" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(1)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(3)" class="bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition flex items-center gap-2">
+                    3. Adım: Altın Prompt Formülü <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 3: KONU ANLATIMI - 4 ALTIN KURAL KARTLARI (20-35 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-3" class="step-section hidden space-y-6">
+            <div class="bg-blue-50 border-l-4 border-brand-blue p-5 rounded-2xl flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-xs text-brand-blue font-bold uppercase tracking-wider">Gagne 4. Etkinlik • 20 - 35. Dakika</span>
+                    <h3 class="font-bold text-slate-800 text-xl mt-1">Süper Web Sitesi Yaptıran 4 Altın Kural 🃏</h3>
+                </div>
+                <span class="text-xs font-bold text-brand-blue bg-white px-3 py-1 rounded-full shadow-sm">Kartlara Tıkla ve Çevir!</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Kart 1: Rol -->
+                <div class="h-64 cursor-pointer perspective-1000" onclick="flipPromptCard(this, 'c1')">
+                    <div class="card-inner relative w-full h-full duration-500 transform-style-3d shadow-md rounded-3xl">
+                        <div class="absolute w-full h-full bg-white border-2 border-purple-200 rounded-3xl p-5 flex flex-col justify-between items-center text-center backface-hidden">
+                            <span class="bg-purple-100 text-brand-purple text-xs font-extrabold px-3 py-1 rounded-full">1. PARÇA</span>
+                            <i class="fa-solid fa-user-astronaut text-5xl text-brand-purple"></i>
+                            <h4 class="text-lg font-bold text-slate-800">ROL VER</h4>
+                            <span class="text-[11px] text-slate-400 font-bold">Çevirmek için tıkla 🔄</span>
+                        </div>
+                        <div class="absolute w-full h-full bg-brand-purple text-white rounded-3xl p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden space-y-2">
+                            <h4 class="font-bold text-base">Yapay Zekaya Kimlik Ver!</h4>
+                            <p class="text-xs text-purple-100">Ona hangi uzman gibi davranacağını söyle.</p>
+                            <div class="bg-white/20 p-2 rounded-xl font-mono text-[11px]">"Sen ödüllü bir web tasarımcısısın..."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 2: Konu & Hedef Kitle -->
+                <div class="h-64 cursor-pointer perspective-1000" onclick="flipPromptCard(this, 'c2')">
+                    <div class="card-inner relative w-full h-full duration-500 transform-style-3d shadow-md rounded-3xl">
+                        <div class="absolute w-full h-full bg-white border-2 border-blue-200 rounded-3xl p-5 flex flex-col justify-between items-center text-center backface-hidden">
+                            <span class="bg-blue-100 text-brand-blue text-xs font-extrabold px-3 py-1 rounded-full">2. PARÇA</span>
+                            <i class="fa-solid fa-bullseye text-5xl text-brand-blue"></i>
+                            <h4 class="text-lg font-bold text-slate-800">KONU & KİTLE</h4>
+                            <span class="text-[11px] text-slate-400 font-bold">Çevirmek için tıkla 🔄</span>
+                        </div>
+                        <div class="absolute w-full h-full bg-brand-blue text-white rounded-3xl p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden space-y-2">
+                            <h4 class="font-bold text-base">Site Ne Hakkında?</h4>
+                            <p class="text-xs text-blue-100">Konuyu ve siteyi kimlerin kullanacağını belirt.</p>
+                            <div class="bg-white/20 p-2 rounded-xl font-mono text-[11px]">"Ortaokul öğrencileri için sokak hayvanları koruma sitesi..."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 3: Tasarım & Renk -->
+                <div class="h-64 cursor-pointer perspective-1000" onclick="flipPromptCard(this, 'c3')">
+                    <div class="card-inner relative w-full h-full duration-500 transform-style-3d shadow-md rounded-3xl">
+                        <div class="absolute w-full h-full bg-white border-2 border-amber-200 rounded-3xl p-5 flex flex-col justify-between items-center text-center backface-hidden">
+                            <span class="bg-amber-100 text-amber-700 text-xs font-extrabold px-3 py-1 rounded-full">3. PARÇA</span>
+                            <i class="fa-solid fa-palette text-5xl text-amber-500"></i>
+                            <h4 class="text-lg font-bold text-slate-800">RENK & STİL</h4>
+                            <span class="text-[11px] text-slate-400 font-bold">Çevirmek için tıkla 🔄</span>
+                        </div>
+                        <div class="absolute w-full h-full bg-amber-500 text-slate-900 rounded-3xl p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden space-y-2">
+                            <h4 class="font-bold text-base">Görünümü Tarif Et!</h4>
+                            <p class="text-xs font-semibold">Renk paletini ve atmosferi yaz.</p>
+                            <div class="bg-white/50 p-2 rounded-xl font-mono text-[11px] font-bold">"Canlı turuncu-beyaz renkli, yuvarlak köşeli modern tasarım..."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 4: Bölümler & Etkileşim -->
+                <div class="h-64 cursor-pointer perspective-1000" onclick="flipPromptCard(this, 'c4')">
+                    <div class="card-inner relative w-full h-full duration-500 transform-style-3d shadow-md rounded-3xl">
+                        <div class="absolute w-full h-full bg-white border-2 border-emerald-200 rounded-3xl p-5 flex flex-col justify-between items-center text-center backface-hidden">
+                            <span class="bg-emerald-100 text-brand-green text-xs font-extrabold px-3 py-1 rounded-full">4. PARÇA</span>
+                            <i class="fa-solid fa-puzzle-piece text-5xl text-brand-green"></i>
+                            <h4 class="text-lg font-bold text-slate-800">BÖLÜM & BUTON</h4>
+                            <span class="text-[11px] text-slate-400 font-bold">Çevirmek için tıkla 🔄</span>
+                        </div>
+                        <div class="absolute w-full h-full bg-brand-green text-white rounded-3xl p-5 flex flex-col justify-center items-center text-center rotate-y-180 backface-hidden space-y-2">
+                            <h4 class="font-bold text-base">İçinde Neler Olsun?</h4>
+                            <p class="text-xs text-emerald-100">Butonları, kartları ve etkileşimleri listele.</p>
+                            <div class="bg-white/20 p-2 rounded-xl font-mono text-[11px]">"Üst menü, 3 bilgi kartı ve tıklanınca ses çıkaran 'Sahiplen' butonu olsun."</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(2)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(4)" class="bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition flex items-center gap-2">
+                    4. Adım: Sürükle-Bırak Prompt İnşa Et <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 4: REHBERLİ UYGULAMA - SÜRÜKLE BIRAK PROMPT SIRALAMA (35-45 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-4" class="step-section hidden space-y-6">
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-2xl flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-xs text-amber-700 font-bold uppercase tracking-wider">Gagne 5. Etkinlik • 35 - 45. Dakika</span>
+                    <h3 class="font-bold text-slate-800 text-xl mt-1">Prompt Bloklarını Doğru Sıraya Diz 🧱</h3>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                <p class="text-xs text-slate-600 font-semibold">
+                    Görev: <strong>"Bilim Kurgu Kitap Kulübü"</strong> web sitesi için aşağıdaki karışık prompt cümlelerini <strong>Rol ➔ Konu ➔ Tasarım ➔ Bölümler</strong> sırasına göre sürükleyip düzenle!
+                </p>
+
+                <ul id="prompt-sort-list" class="space-y-3">
+                    <li draggable="true" data-order="3" class="prompt-sort-item bg-amber-50 border-2 border-amber-300 p-4 rounded-2xl cursor-grab flex items-center justify-between text-xs font-bold text-slate-800">
+                        <span><i class="fa-solid fa-grip-vertical text-slate-400 mr-2"></i> "Arka planı uzay siyahı, yazıları neon mavi ve modern görünümlü tasarla."</span>
+                        <span class="bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg text-[10px]">Renk & Stil</span>
+                    </li>
+                    <li draggable="true" data-order="1" class="prompt-sort-item bg-purple-50 border-2 border-purple-300 p-4 rounded-2xl cursor-grab flex items-center justify-between text-xs font-bold text-slate-800">
+                        <span><i class="fa-solid fa-grip-vertical text-slate-400 mr-2"></i> "Sen yaratıcı bir arayüz (UI) tasarımcısı ve web geliştiricisisin."</span>
+                        <span class="bg-purple-200 text-purple-900 px-2.5 py-1 rounded-lg text-[10px]">Rol</span>
+                    </li>
+                    <li draggable="true" data-order="4" class="prompt-sort-item bg-emerald-50 border-2 border-emerald-300 p-4 rounded-2xl cursor-grab flex items-center justify-between text-xs font-bold text-slate-800">
+                        <span><i class="fa-solid fa-grip-vertical text-slate-400 mr-2"></i> "Sayfada en sevilen 3 kitap kartı ve 'Kulübe Katıl' butonu yer alsın."</span>
+                        <span class="bg-emerald-200 text-emerald-900 px-2.5 py-1 rounded-lg text-[10px]">Bölümler</span>
+                    </li>
+                    <li draggable="true" data-order="2" class="prompt-sort-item bg-blue-50 border-2 border-blue-300 p-4 rounded-2xl cursor-grab flex items-center justify-between text-xs font-bold text-slate-800">
+                        <span><i class="fa-solid fa-grip-vertical text-slate-400 mr-2"></i> "7. sınıf öğrencileri için bir Bilim Kurgu Kitap Kulübü web sitesi yap."</span>
+                        <span class="bg-blue-200 text-blue-900 px-2.5 py-1 rounded-lg text-[10px]">Konu & Kitle</span>
+                    </li>
+                </ul>
+
+                <button onclick="verifyPromptOrder()" class="w-full bg-brand-green text-white font-bold py-3.5 rounded-2xl hover:bg-emerald-600 transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Prompt Sıralamasını Kontrol Et (+25 XP)
+                </button>
+                <div id="sort-feedback" class="hidden p-4 rounded-2xl text-xs font-bold"></div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(3)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(5)" class="bg-amber-500 text-slate-900 px-6 py-3 rounded-2xl font-bold hover:bg-amber-400 transition flex items-center gap-2 shadow">
+                    5. Adım: Canlı AI Web Stüdyosu 🚀 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 5: CANLI AI WEB TASARIM STÜDYOSU (45-60 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-5" class="step-section hidden space-y-6">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-3xl text-white shadow-lg flex justify-between items-center flex-wrap gap-3">
+                <div>
+                    <span class="bg-white/20 text-xs px-3 py-1 rounded-full font-bold uppercase">Gagne 6. Etkinlik • 45 - 60. Dakika</span>
+                    <h3 class="text-2xl font-extrabold mt-1">🚀 Canlı AI Web Tasarım Stüdyosu</h3>
+                    <p class="text-amber-100 text-xs mt-1">Parametreleri seç, yapay zeka istemini otomatik oluştur ve çalışan web siteni anında üret!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Sol Panel: Prompt Oluşturucu Kontrolleri -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm border-b pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-brand-blue"></i> 1. Web Sitesi Özelliklerini Seç
+                    </h4>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Site Konusu / Türü:</label>
+                        <select id="studio-topic" onchange="updateStudioPromptText()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold bg-slate-50">
+                            <option value="space">🚀 Uzay & Gezegen Keşif Portalı</option>
+                            <option value="game">🎮 Retro Piksel Oyun Tanıtım Sitesi</option>
+                            <option value="eco">🌱 Doğa ve Geri Dönüşüm Kulübü</option>
+                            <option value="sport">🏀 Okul Basketbol Takımı Sayfası</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Site Başlığı (Hero Title):</label>
+                        <input type="text" id="studio-title" value="Galaksi Kaşifleri 7-A" oninput="updateStudioPromptText()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Renk Teması:</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setStudioTheme('dark', this)" class="theme-choice p-2 rounded-xl border-2 border-brand-blue bg-slate-900 text-white text-[11px] font-bold">🌌 Koyu Uzay</button>
+                            <button type="button" onclick="setStudioTheme('nature', this)" class="theme-choice p-2 rounded-xl border-2 border-slate-200 bg-emerald-600 text-white text-[11px] font-bold">🌿 Doğa Yeşili</button>
+                            <button type="button" onclick="setStudioTheme('sunset', this)" class="theme-choice p-2 rounded-xl border-2 border-slate-200 bg-orange-500 text-white text-[11px] font-bold">🌅 Enerjik Turuncu</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-600">Eklenecek Etkileşimli Bileşenler:</label>
+                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="chk-nav" checked onchange="updateStudioPromptText()" class="rounded text-brand-blue"> Üst Menü Çubuğu (Header)
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="chk-cards" checked onchange="updateStudioPromptText()" class="rounded text-brand-blue"> 3'lü Bilgi Kartları (Grid Cards)
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="chk-btn" checked onchange="updateStudioPromptText()" class="rounded text-brand-blue"> Etkileşimli Sayaç / Beğeni Butonu
+                        </label>
+                    </div>
+
+                    <!-- Oluşan Prompt Metni -->
+                    <div class="bg-slate-900 text-emerald-300 p-3.5 rounded-2xl font-mono text-[11px] leading-relaxed border border-slate-700">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Oluşturulan AI İstem (Prompt):</div>
+                        <p id="generated-prompt-box"></p>
+                    </div>
+
+                    <button onclick="generateLiveWebsite()" class="w-full bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-95 text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Yapay Zekaya Siteyi Ürettir! (+30 XP)
+                    </button>
+                </div>
+
+                <!-- Sağ Panel: Canlı Üretilen Web Sitesi Ekranı -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-3xl p-4 shadow-xl border-4 border-slate-800 flex flex-col">
+                    <div class="flex items-center justify-between pb-3 px-2 border-b border-slate-700">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs text-slate-400 font-mono ml-2">https://ogrenci-projesi.ai</span>
+                        </div>
+                        <span id="studio-status-badge" class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-bold">Bekleniyor...</span>
+                    </div>
+
+                    <div id="live-website-canvas" class="bg-white rounded-2xl flex-grow mt-3 min-h-[380px] overflow-hidden flex flex-col justify-between transition-all duration-500">
+                        <div class="m-auto text-center p-8 space-y-3">
+                            <div class="w-16 h-16 bg-blue-50 text-brand-blue rounded-2xl flex items-center justify-center text-3xl mx-auto">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-700">Henüz Web Sitesi Üretilmedi</h4>
+                            <p class="text-xs text-slate-400 max-w-xs mx-auto">Sol taraftan site ayarlarını seçip <strong>"Yapay Zekaya Siteyi Ürettir"</strong> butonuna bas!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(4)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(6)" class="bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition flex items-center gap-2">
+                    6. Adım: Prompt Tamircisi (Debugging) <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 6: PROMPT TAMİRCİSİ / İTERASYON (60-65 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-6" class="step-section hidden space-y-6">
+            <div class="bg-pink-50 border-l-4 border-brand-pink p-5 rounded-2xl flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-xs text-brand-pink font-bold uppercase tracking-wider">Gagne 6. Etkinlik (İleri) • 60 - 65. Dakika</span>
+                    <h3 class="font-bold text-slate-800 text-xl mt-1">Prompt Tamircisi: Eksik Siteyi Komutla Düzelt! 🔧</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Vaka 1 -->
+                <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                    <span class="bg-rose-100 text-rose-700 text-xs font-extrabold px-3 py-1 rounded-full">Vaka #1: Okunamayan Yazılar</span>
+                    <p class="text-xs text-slate-600">
+                        Yapay zekaya <em>"Siyah arka planlı bir müzik sitesi yap"</em> dedin ama yapay zeka yazıları da koyu gri yaptığı için hiçbir şey okunmuyor! Siteyi baştan yaptırmak yerine hangi <strong>düzeltme istemini (iterasyon)</strong> yazmalısın?
+                    </p>
+                    <div class="space-y-2">
+                        <button onclick="checkDebugCase(1, false, this)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold">
+                            A) "Siteyi tamamen sil ve bana yemek tarifleri sitesi yap."
+                        </button>
+                        <button onclick="checkDebugCase(1, true, this)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:bg-emerald-50 text-xs font-semibold">
+                            B) "Tasarımı koru ancak kontrastı artırmak için tüm başlıkları parlak beyaz, paragrafları açık gri yap."
+                        </button>
+                    </div>
+                    <div id="debug-fb-1" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+                </div>
+
+                <!-- Vaka 2 -->
+                <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-extrabold px-3 py-1 rounded-full">Vaka #2: Telefonda Bozuk Görünüm</span>
+                    <p class="text-xs text-slate-600">
+                        Oluşturduğun web sitesi bilgisayarda harika görünüyor ama cep telefonundan açınca kutular ekrandan taşıyor. Yapay zekaya hangi sihirli web kavramını söylemelisin?
+                    </p>
+                    <div class="space-y-2">
+                        <button onclick="checkDebugCase(2, true, this)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:bg-emerald-50 text-xs font-semibold">
+                            A) "Web sitesini tüm telefon ve tablet ekranlarına uyumlu (Responsive) hale getir."
+                        </button>
+                        <button onclick="checkDebugCase(2, false, this)" class="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold">
+                            B) "Sitenin arka plan rengini kırmızıya çevir."
+                        </button>
+                    </div>
+                    <div id="debug-fb-2" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(5)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(7)" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-2xl font-bold hover:opacity-95 transition flex items-center gap-2 shadow-lg">
+                    7. Adım: Kendi Promptunla Site Üret ✍️ <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 7: SERBEST PROMPT YAZARLIĞI & GERÇEK AI WEB ÜRETİCİ (65-75 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-7" class="step-section hidden space-y-6">
+            <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 p-6 rounded-3xl text-white shadow-xl flex justify-between items-center flex-wrap gap-3">
+                <div>
+                    <span class="bg-white/20 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Gagne 6 & 7. Etkinlik • 65 - 75. Dakika</span>
+                    <h3 class="text-2xl font-extrabold mt-1">✍️ Serbest Atölye: Kendi Promptunu Yaz, Siteni Canlandır!</h3>
+                    <p class="text-pink-100 text-xs mt-1">Hiçbir hazır kalıp yok! İstediğin konuyu, renkleri, başlıkları ve butonları kendi cümlelerinle yaz; yapay zeka senin için gerçek bir web sayfası kodlasın!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Sol Kolon: Öğrencinin El İle Prompt Yazma Alanı -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-3xl shadow-md border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-keyboard text-brand-purple"></i> Kendi İstemini (Prompt) Yaz
+                            </h4>
+                            <span id="custom-prompt-score-badge" class="text-[10px] font-extrabold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
+                                İstem Gücü: %0
+                            </span>
+                        </div>
+
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            💡 <strong>İpucu:</strong> Yazdığın metinde <strong>Rol</strong>, <strong>Konu</strong>, <strong>Renk/Tema</strong> ve <strong>Bölüm/Buton</strong> detayları geçerse istem gücün yükselir!
+                        </p>
+
+                        <textarea id="free-prompt-input" rows="6" oninput="analyzeFreePrompt()" placeholder="Örn: Sen uzman bir web tasarımcısısın. 7. sınıf öğrencileri için mor ve siyah renkli, uzay temalı bir Bilim Kulübü web sitesi yap. Üstte menü çubuğu, ortada 3 gezegen kartı ve altında tıklanınca sayaç artıran 'Kulübe Katıl' butonu olsun..." class="w-full p-3.5 rounded-2xl border-2 border-purple-200 focus:border-brand-purple focus:outline-none text-xs font-semibold leading-relaxed bg-slate-50"></textarea>
+
+                        <!-- Canlı Prompt Kalite Kontrol Çubuğu -->
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+                            <div class="flex justify-between text-[11px] font-bold">
+                                <span class="text-slate-600">Prompt Kalite Kontrolü:</span>
+                                <span id="prompt-quality-label" class="text-slate-400">Yazmaya başla...</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <div id="prompt-quality-bar" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-bold">
+                                <span id="crit-role" class="text-slate-400"><i class="fa-regular fa-circle"></i> Rol / Kimlik</span>
+                                <span id="crit-topic" class="text-slate-400"><i class="fa-regular fa-circle"></i> Konu / Başlık</span>
+                                <span id="crit-color" class="text-slate-400"><i class="fa-regular fa-circle"></i> Renk / Tema</span>
+                                <span id="crit-comp" class="text-slate-400"><i class="fa-regular fa-circle"></i> Kart / Buton / Menü</span>
+                            </div>
+                        </div>
+
+                        <!-- Hızlı Fikir İlham Butonları -->
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block mb-1.5">Tıkandın mı? Bir başlangıç fikri seçip düzenle:</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="fillSamplePrompt('pizza')" class="text-[10px] bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-lg font-bold transition">🍕 Pizza Dükkanı</button>
+                                <button type="button" onclick="fillSamplePrompt('robot')" class="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-bold transition">🤖 Robotik Kulübü</button>
+                                <button type="button" onclick="fillSamplePrompt('game')" class="text-[10px] bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg font-bold transition">🎮 Espor Takımı</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="build-free-site-btn" onclick="buildCustomFreeWebsite()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-95 text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-wand-sparkles"></i> Yazdığım Prompt ile Web Sitesi Oluştur! (+40 XP)
+                    </button>
+                </div>
+
+                <!-- Sağ Kolon: Gerçek Zamanlı Üretilen Özel Web Sitesi İframe Önizlemesi -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-3xl p-4 shadow-xl border-4 border-slate-800 flex flex-col">
+                    <div class="flex items-center justify-between pb-3 px-2 border-b border-slate-700">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs text-slate-400 font-mono ml-2">https://benim-hayal-sitem.ai</span>
+                        </div>
+                        <span id="free-site-status" class="text-[10px] bg-slate-800 text-amber-300 px-3 py-1 rounded-full font-bold">Prompt Bekleniyor...</span>
+                    </div>
+
+                    <!-- Canlı Iframe Alanı -->
+                    <div class="bg-white rounded-2xl flex-grow mt-3 min-h-[420px] overflow-hidden relative flex flex-col">
+                        <div id="free-site-placeholder" class="m-auto text-center p-8 space-y-3">
+                            <div class="w-16 h-16 bg-purple-50 text-brand-purple rounded-2xl flex items-center justify-center text-3xl mx-auto animate-bounce">
+                                <i class="fa-solid fa-sparkles"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-700">Senin Hayalin, Senin Kodun!</h4>
+                            <p class="text-xs text-slate-400 max-w-sm mx-auto">Sol taraftaki kutuya hayalindeki web sitesini kendi cümlelerinle anlat ve butona bas. Gerçek Yapay Zeka yazdığın her kelimeyi okuyup siteni sıfırdan kodlayacak!</p>
+                        </div>
+                        <div id="free-site-loader" class="hidden m-auto text-center p-8 space-y-3">
+                            <div class="w-14 h-14 border-4 border-purple-200 border-t-brand-purple rounded-full animate-spin mx-auto"></div>
+                            <h4 class="font-bold text-brand-purple">Yapay Zeka Kodluyor...</h4>
+                            <p class="text-xs text-slate-500 max-w-xs mx-auto">İstemin analiz ediliyor, renkler seçiliyor ve etkileşimli HTML sayfası oluşturuluyor.</p>
+                        </div>
+                        <iframe id="free-site-iframe" class="hidden w-full h-full min-h-[420px] border-0" sandbox="allow-scripts"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(6)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="goToStep(8)" class="bg-brand-blue text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition flex items-center gap-2">
+                    8. Adım: Final Quiz & Ev Ödevi <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ADIM 8: DEĞERLENDİRME QUİZİ & EV ÖDEVİ (75-80 DK) -->
+        <!-- ========================================================================= -->
+        <section id="step-8" class="step-section hidden space-y-6">
+            <div class="bg-emerald-50 border-l-4 border-brand-green p-5 rounded-2xl flex justify-between items-center flex-wrap gap-2">
+                <div>
+                    <span class="text-xs text-brand-green font-bold uppercase tracking-wider">Gagne 7, 8 & 9. Etkinlik • 75 - 80. Dakika</span>
+                    <h3 class="font-bold text-slate-800 text-xl mt-1">Final Değerlendirme Quizi & Ev Görevi 🏆</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Final Quiz -->
+                <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4">
+                    <h4 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-question text-brand-blue"></i> 3 Soruluk Kazanım Kontrolü
+                    </h4>
+                    <div id="final-quiz-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Ev Görevi / Transfer -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-3xl shadow-md border border-slate-200 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">🏠 Ev Görevi (Transfer)</span>
+                        <h4 class="font-bold text-slate-800 text-base">Kendi Hayalindeki Web Sitesi Promptunu Yaz</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Evde bir yapay zeka aracına yapıştırıp gerçek web siteni oluşturmak için <strong>Rol + Konu + Renk + Bölümler</strong> formülüyle kendi istemini yaz:
+                        </p>
+                        <textarea id="homework-prompt-input" rows="5" placeholder="Örn: Sen uzman bir web tasarımcısısın. 7. sınıf öğrencileri için açık mavi ve beyaz renkli, satranç taktikleri öğreten bir kulüp sitesi tasarla..." class="w-full p-3 rounded-2xl border border-slate-300 text-xs font-semibold focus:outline-none focus:border-brand-blue"></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <button onclick="submitHomeworkPrompt()" class="w-full bg-brand-purple text-white font-bold py-3 rounded-2xl hover:bg-indigo-700 transition text-xs shadow">
+                            Ödevi Kaydet ve Rozeti Kazan (+40 XP)
+                        </button>
+                        <div id="hw-feedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="goToStep(7)" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-300 transition">Geri</button>
+                <button onclick="toggleAnalyticsModal()" class="bg-brand-green text-white px-6 py-3 rounded-2xl font-bold hover:bg-emerald-600 transition flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-award"></i> Ders Sonu Raporunu Aç
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- BÖTE Öğrenme Analitiği Modalı -->
+    <div id="analytics-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-brand-blue"></i>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">7. Sınıf AI Web Tasarımı • Ders Analitiği</h3>
+                        <p class="text-xs text-slate-400">Gagne'nin 9 Öğretim Etkinliği (80 Dakikalık Plan)</p>
+                    </div>
+                </div>
+                <button onclick="toggleAnalyticsModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">✕</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div class="bg-blue-50 p-3.5 rounded-2xl">
+                    <span class="text-xs text-slate-500 font-bold">Toplam XP</span>
+                    <h4 id="modal-xp" class="text-xl font-bold text-brand-blue">0 XP</h4>
+                </div>
+                <div class="bg-purple-50 p-3.5 rounded-2xl">
+                    <span class="text-xs text-slate-500 font-bold">Tamamlanan Adım</span>
+                    <h4 id="modal-steps" class="text-xl font-bold text-brand-purple">1 / 8</h4>
+                </div>
+                <div class="bg-emerald-50 p-3.5 rounded-2xl">
+                    <span class="text-xs text-slate-500 font-bold">Quiz Başarısı</span>
+                    <h4 id="modal-quiz" class="text-xl font-bold text-brand-green">%0</h4>
+                </div>
+                <div class="bg-amber-50 p-3.5 rounded-2xl">
+                    <span class="text-xs text-slate-500 font-bold">Rozet</span>
+                    <h4 id="modal-badges" class="text-xl font-bold text-amber-600">0</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500">
+        <p>© 2026 Bilişim Teknolojileri ve Yazılım • 7. Sınıf Yapay Zeka & Prompt Mühendisliği Modülü</p>
+    </footer>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch (e) {}
+        }
+
+        const state = {
+            xp: 0,
+            badges: 0,
+            visitedSteps: new Set([1]),
+            flippedCards: new Set(),
+            studioTheme: 'dark',
+            likeCounter: 0,
+            quizCorrect: 0,
+            quizAnswered: 0,
+            freeSiteBuilt: false
+        };
+
+        function addXP(pts) {
+            state.xp += pts;
+            document.getElementById('user-points').innerText = state.xp;
+            document.getElementById('modal-xp').innerText = `${state.xp} XP`;
+        }
+
+        function goToStep(stepNum) {
+            document.querySelectorAll('.step-section').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById(`step-${stepNum}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-pill').forEach(btn => {
+                btn.classList.remove('bg-brand-blue', 'text-white', 'ring-2', 'ring-offset-1', 'ring-brand-blue');
+                if (btn.id !== 'nav-btn-5' && btn.id !== 'nav-btn-7') {
+                    btn.classList.add('bg-slate-100', 'text-slate-600');
+                }
+            });
+            const activeBtn = document.getElementById(`nav-btn-${stepNum}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                if (stepNum !== 5 && stepNum !== 7) activeBtn.classList.add('bg-brand-blue', 'text-white');
+                else activeBtn.classList.add('ring-2', 'ring-offset-1', 'ring-brand-blue');
+            }
+
+            state.visitedSteps.add(stepNum);
+            const pct = Math.round((state.visitedSteps.size / 8) * 100);
+            document.getElementById('level-bar').style.width = `${pct}%`;
+            document.getElementById('level-percent').innerText = `%${pct}`;
+            document.getElementById('modal-steps').innerText = `${state.visitedSteps.size} / 8`;
+
+            playTone('click');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Adım 1: Kötü vs İyi Prompt Demosu
+        function demoPrompt(type) {
+            const box = document.getElementById('step1-preview');
+            if (type === 'bad') {
+                playTone('error');
+                box.innerHTML = `
+                    <div class="w-full h-full bg-gray-200 p-4 text-left font-serif text-black flex flex-col justify-between">
+                        <div>
+                            <h1 class="text-lg underline">uzay sitesi</h1>
+                            <p class="text-xs mt-2">uzay çok büyüktür. gezegenler vardır. bitti.</p>
+                        </div>
+                        <span class="text-[10px] text-red-600 font-sans font-bold">⚠️ Eksik komut yüzünden renksiz, menüsüz ve sıkıcı bir sayfa oluştu!</span>
+                    </div>
+                `;
+            } else {
+                playTone('success');
+                addXP(15);
+                box.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-white p-3 rounded-lg flex flex-col justify-between text-left">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-1.5 text-[10px]">
+                            <span class="font-bold text-amber-300">🪐 KOZMOS 7</span>
+                            <span class="space-x-2 text-indigo-200"><span>Gezegenler</span><span>Test</span></span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 my-1">
+                            <div class="bg-white/10 p-2 rounded-lg text-center"><div class="text-lg">🪐</div><div class="text-[10px] font-bold">Satürn</div></div>
+                            <div class="bg-white/10 p-2 rounded-lg text-center"><div class="text-lg">🔴</div><div class="text-[10px] font-bold">Mars</div></div>
+                            <div class="bg-white/10 p-2 rounded-lg text-center"><div class="text-lg">🌍</div><div class="text-[10px] font-bold">Dünya</div></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-emerald-300 font-bold">✨ Detaylı komutla harika tasarım!</span>
+                            <span class="bg-amber-400 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full">Keşfet 🚀</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Adım 2 Kontrol
+        function checkPriorStep2(isCorrect, btn) {
+            const fb = document.getElementById('prior-fb-2');
+            fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-700', 'bg-emerald-100', 'text-emerald-700');
+            if (isCorrect) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700');
+                fb.innerHTML = '✅ Süper! Sayfanın en üstündeki menü ve logo alanına "Header" denir. (+10 XP)';
+                playTone('success');
+                addXP(10);
+            } else {
+                fb.classList.add('bg-rose-100', 'text-rose-700');
+                fb.innerHTML = '❌ Tekrar düşün! Sayfanın en üst başlık/menü bölgesini arıyoruz.';
+                playTone('error');
+            }
+        }
+
+        // Adım 3 Kart Çevirme
+        function flipPromptCard(el, id) {
+            el.querySelector('.card-inner').classList.toggle('rotate-y-180');
+            playTone('click');
+            if (!state.flippedCards.has(id)) {
+                state.flippedCards.add(id);
+                addXP(5);
+            }
+        }
+
+        // Adım 4 Sürükle-Bırak Sıralama
+        let dragSrcEl = null;
+        function initPromptSort() {
+            const list = document.getElementById('prompt-sort-list');
+            if (!list) return;
+            list.querySelectorAll('.prompt-sort-item').forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    dragSrcEl = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                item.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+                item.addEventListener('drop', function(e) {
+                    e.stopPropagation();
+                    if (dragSrcEl !== this) {
+                        const items = [...list.querySelectorAll('.prompt-sort-item')];
+                        const srcIdx = items.indexOf(dragSrcEl);
+                        const tgtIdx = items.indexOf(this);
+                        if (srcIdx < tgtIdx) this.after(dragSrcEl);
+                        else this.before(dragSrcEl);
+                    }
+                    return false;
+                });
+                item.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+            });
+        }
+
+        function verifyPromptOrder() {
+            const items = document.querySelectorAll('#prompt-sort-list .prompt-sort-item');
+            const order = Array.from(items).map(el => parseInt(el.dataset.order));
+            const fb = document.getElementById('sort-feedback');
+            fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-700', 'bg-emerald-100', 'text-emerald-700');
+
+            if (order.join(',') === '1,2,3,4') {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700');
+                fb.innerHTML = '🎉 Harika! Rol ➔ Konu ➔ Renk & Stil ➔ Bölümler sıralamasını kusursuz kurdun! (+25 XP)';
+                playTone('success');
+                addXP(25);
+            } else {
+                fb.classList.add('bg-rose-100', 'text-rose-700');
+                fb.innerHTML = '❌ Sıralamada hata var! İpucu: Önce yapay zekaya Rol ver, sonra Konuyu söyle, ardından Renkleri ve en son Bölümleri ekle.';
+                playTone('error');
+            }
+        }
+
+        // Adım 5: Canlı AI Web Stüdyosu
+        function setStudioTheme(theme, btn) {
+            state.studioTheme = theme;
+            document.querySelectorAll('.theme-choice').forEach(b => b.classList.remove('border-brand-blue', 'ring-2', 'ring-brand-blue'));
+            btn.classList.add('border-brand-blue', 'ring-2', 'ring-brand-blue');
+            updateStudioPromptText();
+        }
+
+        function updateStudioPromptText() {
+            const topicMap = {
+                space: 'Uzay ve Gezegen Keşif Portalı',
+                game: 'Retro Piksel Oyun Tanıtım Sitesi',
+                eco: 'Doğa ve Geri Dönüşüm Kulübü',
+                sport: 'Okul Basketbol Takımı Sayfası'
+            };
+            const themeMap = {
+                dark: 'koyu lacivert-mor uzay temalı',
+                nature: 'ferah doğa yeşili ve beyaz temalı',
+                sunset: 'enerjik turuncu ve sarı temalı'
+            };
+            const topic = topicMap[document.getElementById('studio-topic').value];
+            const title = document.getElementById('studio-title').value || 'Benim Web Sitem';
+            const parts = [];
+            if (document.getElementById('chk-nav').checked) parts.push('üst menü çubuğu');
+            if (document.getElementById('chk-cards').checked) parts.push('3 adet bilgi kartı');
+            if (document.getElementById('chk-btn').checked) parts.push('etkileşimli beğeni butonu');
+
+            const promptStr = `"Sen uzman bir web tasarımcısısın. 7. sınıf öğrencileri için '${title}' başlıklı, ${themeMap[state.studioTheme]} bir ${topic} oluştur. Sayfada ${parts.join(', ') || 'temel içerik alanı'} bulunsun."`;
+            document.getElementById('generated-prompt-box').innerText = promptStr;
+        }
+
+        function generateLiveWebsite() {
+            const topic = document.getElementById('studio-topic').value;
+            const title = document.getElementById('studio-title').value || '7. Sınıf Web Projesi';
+            const hasNav = document.getElementById('chk-nav').checked;
+            const hasCards = document.getElementById('chk-cards').checked;
+            const hasBtn = document.getElementById('chk-btn').checked;
+            const canvas = document.getElementById('live-website-canvas');
+            const badge = document.getElementById('studio-status-badge');
+
+            badge.innerText = '⚡ AI Kodluyor...';
+            playTone('click');
+
+            const themes = {
+                dark: { bg: 'bg-slate-900 text-white', nav: 'bg-indigo-950 border-indigo-800', card: 'bg-slate-800 border-slate-700', accent: 'bg-amber-400 text-slate-900' },
+                nature: { bg: 'bg-emerald-50 text-slate-800', nav: 'bg-emerald-700 text-white', card: 'bg-white border-emerald-200 shadow-sm', accent: 'bg-emerald-600 text-white' },
+                sunset: { bg: 'bg-orange-50 text-slate-800', nav: 'bg-orange-600 text-white', card: 'bg-white border-orange-200 shadow-sm', accent: 'bg-orange-500 text-white' }
+            };
+
+            const contentMap = {
+                space: [
+                    { icon: '🪐', name: 'Satürn Halkaları', desc: 'Buz ve kaya parçalarından oluşan dev halka sistemi.' },
+                    { icon: '🚀', name: 'Mars Görevi', desc: 'Kızıl gezegende su izleri arayan robot kaşifler.' },
+                    { icon: '🌟', name: 'Samanyolu', desc: 'Milyarlarca yıldıza ev sahipliği yapan galaksimiz.' }
+                ],
+                game: [
+                    { icon: '👾', name: 'Bölüm 1: Başlangıç', desc: 'Engelleri aş ve altın yıldızları topla.' },
+                    { icon: '🕹️', name: 'Karakter Seçimi', desc: 'Hızlı veya zıplayan kahramanını belirle.' },
+                    { icon: '🏆', name: 'Liderlik Tablosu', desc: 'En yüksek skoru yaparak şampiyon ol.' }
+                ],
+                eco: [
+                    { icon: '♻️', name: 'Geri Dönüşüm', desc: 'Kağıt, plastik ve cam atıkları ayrı kutulara at.' },
+                    { icon: '🌳', name: 'Fidan Dikimi', desc: 'Her öğrenci bir fidan dikerek ormanları büyütür.' },
+                    { icon: '💧', name: 'Su Tasarrufu', desc: 'Geleceğimiz için her damla suyu koruyalım.' }
+                ],
+                sport: [
+                    { icon: '🏀', name: 'Antrenman Saatleri', desc: 'Salı ve Perşembe 15:30 okul spor salonu.' },
+                    { icon: '👟', name: 'Takım Kadrosu', desc: '7. sınıfların en dinamik basketbol yıldızları.' },
+                    { icon: '🥇', name: 'Turnuva Kupası', desc: 'İlçe okullar arası turnuvada hedef şampiyonluk!' }
+                ]
+            };
+
+            const t = themes[state.studioTheme];
+            const cards = contentMap[topic];
+            state.likeCounter = 0;
+
+            setTimeout(() => {
+                badge.innerText = '✅ Site Yayında!';
+                badge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold';
+                playTone('success');
+                addXP(30);
+
+                canvas.className = `rounded-2xl flex-grow mt-3 min-h-[380px] overflow-hidden flex flex-col justify-between transition-all duration-500 ${t.bg}`;
+                canvas.innerHTML = `
+                    ${hasNav ? `
+                        <div class="px-5 py-3 border-b flex justify-between items-center text-xs font-bold ${t.nav}">
+                            <span>✨ ${title}</span>
+                            <div class="space-x-3 opacity-80"><span>Ana Sayfa</span><span>Hakkında</span><span>İletişim</span></div>
+                        </div>
+                    ` : ''}
+                    <div class="p-6 text-center space-y-2">
+                        <h2 class="text-2xl font-extrabold">${title}</h2>
+                        <p class="text-xs opacity-75 max-w-md mx-auto">Bu web sayfası senin oluşturduğun yapay zeka istemi (prompt) ile saniyeler içinde üretildi!</p>
+                    </div>
+                    ${hasCards ? `
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5">
+                            ${cards.map(c => `
+                                <div class="p-3.5 rounded-2xl border text-center space-y-1 ${t.card}">
+                                    <div class="text-2xl">${c.icon}</div>
+                                    <div class="font-bold text-xs">${c.name}</div>
+                                    <p class="text-[11px] opacity-75">${c.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="p-5 text-center">
+                        ${hasBtn ? `
+                            <button onclick="incrementSiteLike()" class="px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transform active:scale-95 transition ${t.accent}">
+                                ❤️ Siteyi Beğen (<span id="site-like-val">0</span>)
+                            </button>
+                        ` : '<span class="text-[10px] opacity-50">Alt Bilgi Alanı (Footer)</span>'}
+                    </div>
+                `;
+            }, 450);
+        }
+
+        function incrementSiteLike() {
+            state.likeCounter++;
+            const el = document.getElementById('site-like-val');
+            if (el) el.innerText = state.likeCounter;
+            playTone('click');
+        }
+
+        // Adım 6: Prompt Tamircisi
+        function checkDebugCase(caseId, isCorrect, btn) {
+            const fb = document.getElementById(`debug-fb-${caseId}`);
+            fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-700', 'bg-emerald-100', 'text-emerald-700');
+            if (isCorrect) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700');
+                fb.innerHTML = '✅ Harika! Mevcut tasarımı bozmadan hedefe yönelik nokta atışı düzeltme komutu verdin! (+20 XP)';
+                playTone('success');
+                addXP(20);
+            } else {
+                fb.classList.add('bg-rose-100', 'text-rose-700');
+                fb.innerHTML = '❌ Bu komut sorunu çözmez. Mevcut yapıyı koruyarak hatayı tarif etmelisin.';
+                playTone('error');
+            }
+        }
+
+        // =========================================================================
+        // ADIM 7: SERBEST PROMPT ANALİZÖRÜ VE GERÇEK GEMINI AI WEB ÜRETİCİ
+        // =========================================================================
+        function fillSamplePrompt(type) {
+            const box = document.getElementById('free-prompt-input');
+            if (type === 'pizza') {
+                box.value = "Sen yaratıcı bir web tasarımcısısın. Sıcak turuncu ve kırmızı renklerde eğlenceli bir Pizza Dükkanı web sitesi yap. Üstte menü çubuğu, ortada 3 çeşit pizza kartı ve altında tıklanınca sipariş sayacını artıran 'Hemen Sipariş Ver' butonu olsun.";
+            } else if (type === 'robot') {
+                box.value = "Sen ödüllü bir arayüz geliştiricisisin. 7. sınıf öğrencileri için koyu lacivert ve neon mavi temalı bir Robotik ve Kodlama Kulübü web sitesi tasarla. Üst menü, 3 adet robot projesi kartı ve etkileşimli 'Kulübe Katıl' butonu ekle.";
+            } else if (type === 'game') {
+                box.value = "Sen modern bir web tasarımcısısın. Mor ve siyah renkli havalı bir Espor Oyun Takımı web sitesi oluştur. Sayfada takım üyelerini tanıtan 3 kart, üst navigasyon menüsü ve 'Takımı Destekle' sayacı butonu yer alsın.";
+            }
+            analyzeFreePrompt();
+            playTone('click');
+        }
+
+        function analyzeFreePrompt() {
+            const text = document.getElementById('free-prompt-input').value.toLowerCase();
+            let score = 0;
+
+            const hasRole = /(tasarımcı|geliştirici|uzman|mühendis|sen bir|rolün)/i.test(text);
+            const hasTopic = /(site|sayfa|kulüp|oyun|uzay|pizza|spor|müzik|kitap|robot|hayvan|doğa|okul|bilim|kedi|matematik)/i.test(text) && text.length > 12;
+            const hasColor = /(renk|mavi|kırmızı|yeşil|mor|sarı|turuncu|siyah|beyaz|pembe|koyu|açık|tema|neon|pastel)/i.test(text);
+            const hasComp = /(kart|buton|menü|başlık|sayaç|galeri|liste|header|footer|bölüm|miyav|oyna)/i.test(text);
+
+            const updateBadge = (id, ok, label) => {
+                const el = document.getElementById(id);
+                if (ok) {
+                    el.className = 'text-emerald-600 font-extrabold';
+                    el.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${label}`;
+                    score += 25;
+                } else {
+                    el.className = 'text-slate-400';
+                    el.innerHTML = `<i class="fa-regular fa-circle"></i> ${label}`;
+                }
+            };
+
+            updateBadge('crit-role', hasRole, 'Rol / Kimlik');
+            updateBadge('crit-topic', hasTopic, 'Konu / Başlık');
+            updateBadge('crit-color', hasColor, 'Renk / Tema');
+            updateBadge('crit-comp', hasComp, 'Kart / Buton / Menü');
+
+            document.getElementById('prompt-quality-bar').style.width = `${score}%`;
+            document.getElementById('custom-prompt-score-badge').innerText = `İstem Gücü: %${score}`;
+
+            const lbl = document.getElementById('prompt-quality-label');
+            if (score === 0) lbl.innerText = 'Yazmaya başla...';
+            else if (score <= 50) { lbl.innerText = 'Geliştirilebilir (Detay ekle)'; lbl.className = 'text-amber-600'; }
+            else if (score === 75) { lbl.innerText = 'Çok İyi!'; lbl.className = 'text-blue-600'; }
+            else { lbl.innerText = 'Süper Prompt! 🌟'; lbl.className = 'text-emerald-600'; }
+        }
+
+        async function buildCustomFreeWebsite() {
+            const rawPrompt = document.getElementById('free-prompt-input').value.trim();
+            if (rawPrompt.length < 8) {
+                playTone('error');
+                const st = document.getElementById('free-site-status');
+                st.innerText = '⚠️ Lütfen önce hayalindeki siteyi anlatan bir prompt yaz!';
+                st.className = 'text-[10px] bg-rose-500/20 text-rose-300 px-3 py-1 rounded-full font-bold';
+                return;
+            }
+
+            const btn = document.getElementById('build-free-site-btn');
+            const statusBadge = document.getElementById('free-site-status');
+            const placeholder = document.getElementById('free-site-placeholder');
+            const loader = document.getElementById('free-site-loader');
+            const iframe = document.getElementById('free-site-iframe');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+            statusBadge.innerText = '🤖 Gemini AI Kodluyor...';
+            statusBadge.className = 'text-[10px] bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full font-bold';
+
+            placeholder.classList.add('hidden');
+            iframe.classList.add('hidden');
+            loader.classList.remove('hidden');
+            playTone('click');
+
+            const systemInstruction = `Sen 7. sınıf öğrencileri için çalışan uzman bir Front-End Web Geliştiricisisin. 
+Kullanıcının verdiği Türkçe isteme (prompt) TAM OLARAK uygun, tek dosyalık, modern, renkli, çocuk dostu ve etkileşimli (butonları çalışan, sayaçları artan veya mini oyun/kart açma içeren) tam bir HTML sayfası üret.
+Kurallar:
+1. SADECE geçerli, eksiksiz HTML kodu döndür (<!DOCTYPE html> ile başla, </html> ile bitir). Markdown backtick (\`\`\`html) veya açıklama metni EKLEME.
+2. Kullanıcının istediği konuyu, renkleri, başlıkları, menüyü, kartları ve buton isimlerini birebir uygula.
+3. Harici resim URL'si kullanma; görseller için zengin emojiler ve CSS gradyanları/ikonları kullan.
+4. Sayfa küçük bir iframe içinde (yaklaşık 420px yükseklik) güzel görünecek şekilde kompakt, duyarlı (responsive) ve kaydırılabilir olsun.
+5. Asla alert() kullanma; etkileşimli butonlar sayfa içindeki metinleri, sayaçları veya kartları değiştirsin.`;
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `Öğrenci İstemi (Prompt): ${rawPrompt}` }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+
+            let generatedHTML = null;
+
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('API Error');
+                    const data = await response.json();
+                    let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    text = text.replace(/^```html\s*/i, '').replace(/```\s*$/i, '').trim();
+                    if (text.includes('<html') || text.includes('<body') || text.includes('<div')) {
+                        generatedHTML = text;
+                        break;
+                    }
+                } catch (err) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+                }
+            }
+
+            if (!generatedHTML) {
+                generatedHTML = buildSmartFallbackHTML(rawPrompt);
+            }
+
+            loader.classList.add('hidden');
+            iframe.classList.remove('hidden');
+            iframe.srcdoc = generatedHTML;
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            statusBadge.innerText = '✅ İstemine Göre Üretildi!';
+            statusBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-bold';
+            playTone('success');
+
+            if (!state.freeSiteBuilt) {
+                state.freeSiteBuilt = true;
+                addXP(40);
+            } else {
+                addXP(10);
+            }
+        }
+
+        function buildSmartFallbackHTML(rawPrompt) {
+            const p = rawPrompt.toLowerCase();
+            let bg = '#0f172a', text = '#f8fafc', card = '#1e293b', accent = '#6366f1', accentText = '#ffffff';
+            if (p.includes('yeşil')) { bg = '#ecfdf5'; text = '#064e3b'; card = '#ffffff'; accent = '#10b981'; }
+            else if (p.includes('turuncu')) { bg = '#fff7ed'; text = '#7c2d12'; card = '#ffffff'; accent = '#f97316'; }
+            else if (p.includes('kırmızı')) { bg = '#fef2f2'; text = '#7f1d1d'; card = '#ffffff'; accent = '#ef4444'; }
+            else if (p.includes('mor')) { bg = '#2e1065'; text = '#f5f3ff'; card = '#4c1d95'; accent = '#c084fc'; accentText = '#1e1b4b'; }
+            else if (p.includes('pembe')) { bg = '#fdf2f8'; text = '#831843'; card = '#ffffff'; accent = '#ec4899'; }
+            else if (p.includes('sarı')) { bg = '#fefce8'; text = '#713f12'; card = '#ffffff'; accent = '#eab308'; accentText = '#1e293b'; }
+            else if (p.includes('beyaz') || p.includes('açık')) { bg = '#f8fafc'; text = '#1e293b'; card = '#ffffff'; accent = '#2563eb'; }
+
+            const cleanTitle = rawPrompt.split(/[.!?]/)[0].slice(0, 42) || "Özel Web Projem";
+            return `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><style>
+                body{margin:0;font-family:sans-serif;background:${bg};color:${text};padding:18px;text-align:center}
+                .nav{background:${accent};color:${accentText};padding:10px 16px;border-radius:12px;font-weight:bold;display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px}
+                .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+                .c{background:${card};padding:14px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);font-size:12px}
+                button{background:${accent};color:${accentText};border:none;padding:10px 20px;border-radius:99px;font-weight:bold;cursor:pointer}
+            </style></head><body>
+                <div class="nav"><span>✨ ${cleanTitle}</span><span>Ana Sayfa • Keşfet</span></div>
+                <h2>${cleanTitle}</h2>
+                <p style="font-size:12px;opacity:.8">${rawPrompt}</p>
+                <div class="cards">
+                    <div class="c"><h3>🚀 Bölüm 1</h3><p>İstemine özel içerik kartı</p></div>
+                    <div class="c"><h3>🎨 Bölüm 2</h3><p>Seçtiğin renklere göre tasarlandı</p></div>
+                    <div class="c"><h3>⚡ Bölüm 3</h3><p>Etkileşimli web bileşeni</p></div>
+                </div>
+                <button onclick="this.innerText='🎉 Tıklandı! ('+(++window.c||(window.c=1))+')'">Etkileşim Butonu</button>
+            </body></html>`;
+        }
+
+        // Adım 8: Final Quiz
+        const quizQuestions = [
+            {
+                q: "1. Yapay zekaya web sitesi yaptırırken 'Sen uzman bir web tasarımcısısın' cümlesi hangi bileşendir?",
+                opts: ["Rol (Persona)", "Renk Kodu", "Alt Bilgi (Footer)"],
+                ans: 0
+            },
+            {
+                q: "2. Üretilen bir web sitesindeki eksikleri ek komutlar vererek adım adım düzeltmeye ne denir?",
+                opts: ["İterasyon (İyileştirme)", "Format Atma", "Donanım Kurulumu"],
+                ans: 0
+            },
+            {
+                q: "3. Web sitesinin hem bilgisayarda hem de cep telefonunda düzgün görünmesi için prompta ne eklenmelidir?",
+                opts: ["Responsive (Mobil Uyumlu)", "Sadece Siyah Beyaz", "Şifreli Giriş"],
+                ans: 0
+            }
+        ];
+
+        function renderFinalQuiz() {
+            const box = document.getElementById('final-quiz-list');
+            if (!box) return;
+            box.innerHTML = quizQuestions.map((item, idx) => `
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <p class="font-bold text-xs text-slate-800">${item.q}</p>
+                    <div class="space-y-1.5">
+                        ${item.opts.map((opt, oIdx) => `
+                            <button onclick="answerFinalQuiz(${idx}, ${oIdx}, this)" class="q-opt-${idx} w-full text-left p-2.5 rounded-xl bg-white border border-slate-200 hover:border-brand-blue text-xs font-semibold transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerFinalQuiz(qIdx, oIdx, btn) {
+            const buttons = document.querySelectorAll(`.q-opt-${qIdx}`);
+            if (Array.from(buttons).some(b => b.disabled)) return;
+            buttons.forEach(b => b.disabled = true);
+
+            state.quizAnswered++;
+            if (oIdx === quizQuestions[qIdx].ans) {
+                btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+                playTone('success');
+                state.quizCorrect++;
+                addXP(15);
+            } else {
+                btn.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+                buttons[quizQuestions[qIdx].ans].classList.add('bg-emerald-100', 'border-emerald-500');
+                playTone('error');
+            }
+            const acc = Math.round((state.quizCorrect / state.quizAnswered) * 100);
+            document.getElementById('modal-quiz').innerText = `%${acc}`;
+        }
+
+        function submitHomeworkPrompt() {
+            const val = document.getElementById('homework-prompt-input').value.trim();
+            const fb = document.getElementById('hw-feedback');
+            fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-700', 'bg-emerald-100', 'text-emerald-700');
+
+            if (val.length >= 25) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700');
+                fb.innerHTML = '🏆 Tebrikler! Harika bir web tasarım istemi yazdın ve "AI Web Mimarı" rozetini kazandın! (+40 XP)';
+                playTone('success');
+                addXP(40);
+                state.badges = 1;
+                document.getElementById('user-badges-count').innerText = '1';
+                document.getElementById('modal-badges').innerText = '1';
+            } else {
+                fb.classList.add('bg-rose-100', 'text-rose-700');
+                fb.innerHTML = '⚠️ İstem çok kısa! Lütfen Rol, Konu, Renk ve Bölümleri içeren en az 1-2 cümle yaz.';
+                playTone('error');
+            }
+        }
+
+        function toggleAnalyticsModal() {
+            document.getElementById('analytics-modal').classList.toggle('hidden');
+        }
+
+        window.onload = function() {
+            goToStep(1);
+            initPromptSort();
+            updateStudioPromptText();
+            renderFinalQuiz();
+        };
+    </script>
+</body>
+</html>
